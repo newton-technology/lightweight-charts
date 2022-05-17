@@ -22,6 +22,8 @@ export const candlestickStyleDefaults: CandlestickStyleOptions = {
 	wickColor: '#737375',
 	wickUpColor: '#26a69a',
 	wickDownColor: '#ef5350',
+	cornerRadius: 0,
+	wickWidth: 0.1,
 };
 
 export const barStyleDefaults: BarStyleOptions = {

@@ -16,6 +16,8 @@ export interface PaneRendererCandlesticksData {
 	bars: readonly CandlestickItem[];
 
 	barSpacing: number;
+	cornerRadius: number;
+	wickWidth: number;
 
 	wickVisible: boolean;
 	borderVisible: boolean;
@@ -62,13 +64,21 @@ export class PaneRendererCandlesticks implements IPaneRenderer {
 		}
 
 		if (this._data.borderVisible) {
-			this._drawBorder(ctx, bars, this._data.visibleRange, this._data.barSpacing, pixelRatio);
+			if (this._data.cornerRadius > 0) {
+				this._drawRoundedBorder(ctx, bars, this._data.visibleRange, this._data.barSpacing, pixelRatio);
+			} else {
+				this._drawBorder(ctx, bars, this._data.visibleRange, this._data.barSpacing, pixelRatio);
+			}
 		}
 
 		const borderWidth = this._calculateBorderWidth(pixelRatio);
 
 		if (!this._data.borderVisible || this._barWidth > borderWidth * 2) {
-			this._drawCandles(ctx, bars, this._data.visibleRange, pixelRatio);
+			if (this._data.cornerRadius > 0) {
+				this._drawRoundedCandles(ctx, bars, this._data.visibleRange, pixelRatio);
+			} else {
+				this._drawCandles(ctx, bars, this._data.visibleRange, pixelRatio);
+			}
 		}
 	}
 
@@ -78,7 +88,7 @@ export class PaneRendererCandlesticks implements IPaneRenderer {
 		}
 		let prevWickColor = '';
 
-		let wickWidth = Math.min(Math.floor(pixelRatio), Math.floor(this._data.barSpacing * pixelRatio));
+		let wickWidth = Math.floor(this._data.barSpacing * this._data.wickWidth * pixelRatio);
 		wickWidth = Math.max(Math.floor(pixelRatio), Math.min(wickWidth, this._barWidth));
 		const wickOffset = Math.floor(wickWidth * 0.5);
 
@@ -164,6 +174,44 @@ export class PaneRendererCandlesticks implements IPaneRenderer {
 		}
 	}
 
+	private _drawRoundedBorder(ctx: CanvasRenderingContext2D, bars: readonly CandlestickItem[], visibleRange: SeriesItemsIndexesRange, barSpacing: number, pixelRatio: number): void {
+		if (this._data === null) {
+			return;
+		}
+		let prevBorderColor: string | undefined = '';
+		const borderWidth = this._calculateBorderWidth(pixelRatio);
+		const offset = borderWidth / 2;
+
+		let prevEdge: number | null = null;
+
+		for (let i = visibleRange.from; i < visibleRange.to; i++) {
+			const bar = bars[i];
+			const top = Math.round(Math.min(bar.openY, bar.closeY) * pixelRatio);
+			const bottom = Math.round(Math.max(bar.openY, bar.closeY) * pixelRatio) + 1;
+
+			let left = Math.round(bar.x * pixelRatio) - Math.floor(this._barWidth * 0.5);
+			const right = left + this._barWidth;
+
+			const radius = Math.min((bottom - top) / 2, this._data.cornerRadius * this._barWidth);
+
+			if (bar.borderColor !== prevBorderColor) {
+				ctx.strokeStyle = bar.borderColor;
+				prevBorderColor = bar.borderColor;
+			}
+
+			if (prevEdge !== null) {
+				left = Math.max(prevEdge + 1, left);
+				left = Math.min(left, right);
+			}
+
+			ctx.lineWidth = borderWidth;
+			this._drawRoundedRect(ctx, left + offset, right - offset, top + offset, bottom - offset, radius - offset);
+			ctx.stroke();
+
+			prevEdge = right;
+		}
+	}
+
 	private _drawCandles(ctx: CanvasRenderingContext2D, bars: readonly CandlestickItem[], visibleRange: SeriesItemsIndexesRange, pixelRatio: number): void {
 		if (this._data === null) {
 			return;
@@ -200,5 +248,66 @@ export class PaneRendererCandlesticks implements IPaneRenderer {
 			}
 			ctx.fillRect(left, top, right - left + 1, bottom - top + 1);
 		}
+	}
+
+	private _drawRoundedCandles(ctx: CanvasRenderingContext2D, bars: readonly CandlestickItem[], visibleRange: SeriesItemsIndexesRange, pixelRatio: number): void {
+		if (this._data === null) {
+			return;
+		}
+
+		let prevBarColor = '';
+
+		const borderWidth = this._calculateBorderWidth(pixelRatio);
+
+		for (let i = visibleRange.from; i < visibleRange.to; i++) {
+			const bar = bars[i];
+
+			let top = Math.round(Math.min(bar.openY, bar.closeY) * pixelRatio);
+			let bottom = Math.round(Math.max(bar.openY, bar.closeY) * pixelRatio) + 1;
+
+			let left = Math.round(bar.x * pixelRatio) - Math.floor(this._barWidth * 0.5);
+			let right = left + this._barWidth;
+
+			let radius = Math.min((bottom - top) / 2, this._data.cornerRadius * this._barWidth);
+
+			if (bar.color !== prevBarColor) {
+				const barColor = bar.color;
+				ctx.fillStyle = barColor;
+				prevBarColor = barColor;
+			}
+
+			if (this._data.borderVisible) {
+				left += borderWidth;
+				top += borderWidth;
+				right -= borderWidth;
+				bottom -= borderWidth;
+				radius -= borderWidth;
+			}
+
+			this._drawRoundedRect(ctx, left, right, top, bottom, radius);
+			ctx.fill();
+		}
+	}
+
+	private _drawRoundedRect(ctx: CanvasRenderingContext2D, left: number, right: number, top: number, bottom: number, radius: number): void {
+		if (this._data === null) {
+			return;
+		}
+
+		if (top > bottom) {
+			return;
+		}
+
+		ctx.beginPath();
+		ctx.moveTo(left + radius, top);
+		ctx.lineTo(right - radius, top);
+		ctx.quadraticCurveTo(right, top, right, top + radius);
+		ctx.lineTo(right, bottom - radius);
+		ctx.quadraticCurveTo(right, bottom, right - radius, bottom);
+		ctx.lineTo(left + radius, bottom);
+		ctx.quadraticCurveTo(left, bottom, left, bottom - radius);
+		ctx.lineTo(left, top + radius);
+		ctx.quadraticCurveTo(left, top, left + radius, top);
+		ctx.closePath();
 	}
 }
