@@ -16,6 +16,8 @@ export interface PaneRendererHistogramData {
 	barSpacing: number;
 	histogramBase: number;
 
+	cornerRadius: number;
+
 	visibleRange: SeriesItemsIndexesRange | null;
 }
 
@@ -66,7 +68,32 @@ export class PaneRendererHistogram implements IPaneRenderer {
 				bottom = y - Math.floor(tickWidth / 2) + tickWidth;
 			}
 
-			ctx.fillRect(current.left, top, current.right - current.left + 1, bottom - top);
+			if (this._data.cornerRadius > 0) {
+				const barWidth = current.right - current.left + 1;
+				const radius = Math.min((bottom - top) / 2, this._data.cornerRadius * barWidth);
+				ctx.beginPath();
+				if (y <= topHistogramBase) {
+					ctx.moveTo(current.left + radius, top);
+					ctx.lineTo(current.right - radius, top);
+					ctx.quadraticCurveTo(current.right, top, current.right, top + radius);
+					ctx.lineTo(current.right, bottom);
+					ctx.lineTo(current.left, bottom);
+					ctx.lineTo(current.left, top + radius);
+					ctx.quadraticCurveTo(current.left, top, current.left + radius, top);
+				} else {
+					ctx.moveTo(current.left, top);
+					ctx.lineTo(current.right, top);
+					ctx.lineTo(current.right, bottom - radius);
+					ctx.quadraticCurveTo(current.right, bottom, current.right - radius, bottom);
+					ctx.lineTo(current.left + radius, bottom);
+					ctx.quadraticCurveTo(current.left, bottom, current.left, bottom - radius);
+					ctx.lineTo(current.left, top);
+				}
+				ctx.closePath();
+				ctx.fill();
+			} else {
+				ctx.fillRect(current.left, top, current.right - current.left + 1, bottom - top);
+			}
 		}
 	}
 
