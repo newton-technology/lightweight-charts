@@ -438,6 +438,13 @@ export interface HistogramStyleOptions {
 	 * @defaultValue `0`
 	 */
 	base: number;
+
+	/**
+	 * Corner radius
+	 *
+	 * @defaultValue `0`
+	 */
+	cornerRadius: number;
 }
 
 /**
