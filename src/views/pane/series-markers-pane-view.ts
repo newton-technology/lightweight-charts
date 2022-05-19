@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 import { ensureNever } from '../../helpers/assertions';
 import { isNumber } from '../../helpers/strict-type-checks';
 
@@ -50,21 +51,34 @@ function fillSizeAndY(
 	const sizeMultiplier = isNumber(marker.size) ? Math.max(marker.size, 0) : 1;
 	const shapeSize = calculateShapeHeight(timeScale.barSpacing()) * sizeMultiplier;
 	const halfSize = shapeSize / 2;
+	const textPosition = marker.textPosition ?? 'auto';
 	rendererItem.size = shapeSize;
 
 	switch (marker.position) {
 		case 'inBar': {
 			rendererItem.y = priceScale.priceToCoordinate(inBarPrice, firstValue);
 			if (rendererItem.text !== undefined) {
-				rendererItem.text.y = rendererItem.y + halfSize + shapeMargin + textHeight * (0.5 + Constants.TextMargin) as Coordinate;
+				switch (textPosition) {
+					case 'insideMarker':
+						rendererItem.text.y = rendererItem.y + textHeight * Constants.TextMargin as Coordinate;
+						break;
+					default:
+						rendererItem.text.y = rendererItem.y + halfSize + shapeMargin + textHeight * (0.5 + Constants.TextMargin) as Coordinate;
+				}
 			}
 			return;
 		}
 		case 'aboveBar': {
 			rendererItem.y = (priceScale.priceToCoordinate(highPrice, firstValue) - halfSize - offsets.aboveBar) as Coordinate;
 			if (rendererItem.text !== undefined) {
-				rendererItem.text.y = rendererItem.y - halfSize - textHeight * (0.5 + Constants.TextMargin) as Coordinate;
-				offsets.aboveBar += textHeight * (1 + 2 * Constants.TextMargin);
+				switch (textPosition) {
+					case 'insideMarker':
+						rendererItem.text.y = rendererItem.y + textHeight * Constants.TextMargin as Coordinate;
+						break;
+					default:
+						rendererItem.text.y = rendererItem.y - halfSize - textHeight * (0.5 + Constants.TextMargin) as Coordinate;
+						offsets.aboveBar += textHeight * (1 + 2 * Constants.TextMargin);
+				}
 			}
 			offsets.aboveBar += shapeSize + shapeMargin;
 			return;
@@ -72,10 +86,42 @@ function fillSizeAndY(
 		case 'belowBar': {
 			rendererItem.y = (priceScale.priceToCoordinate(lowPrice, firstValue) + halfSize + offsets.belowBar) as Coordinate;
 			if (rendererItem.text !== undefined) {
-				rendererItem.text.y = rendererItem.y + halfSize + shapeMargin + textHeight * (0.5 + Constants.TextMargin) as Coordinate;
-				offsets.belowBar += textHeight * (1 + 2 * Constants.TextMargin);
+				switch (textPosition) {
+					case 'insideMarker':
+						rendererItem.text.y = rendererItem.y + textHeight * Constants.TextMargin as Coordinate;
+						break;
+					default:
+						rendererItem.text.y = rendererItem.y + halfSize + shapeMargin + textHeight * (0.5 + Constants.TextMargin) as Coordinate;
+						offsets.belowBar += textHeight * (1 + 2 * Constants.TextMargin);
+				}
 			}
 			offsets.belowBar += shapeSize + shapeMargin;
+			return;
+		}
+		case 'top': {
+			rendererItem.y = halfSize as Coordinate;
+			if (rendererItem.text !== undefined) {
+				switch (textPosition) {
+					case 'insideMarker':
+						rendererItem.text.y = rendererItem.y + textHeight * Constants.TextMargin as Coordinate;
+						break;
+					default:
+						rendererItem.text.y = rendererItem.y + halfSize + shapeMargin + textHeight * (0.5 + Constants.TextMargin) as Coordinate;
+				}
+			}
+			return;
+		}
+		case 'bottom': {
+			rendererItem.y = priceScale.height() - halfSize as Coordinate;
+			if (rendererItem.text !== undefined) {
+				switch (textPosition) {
+					case 'insideMarker':
+						rendererItem.text.y = rendererItem.y + textHeight * Constants.TextMargin as Coordinate;
+						break;
+					default:
+						rendererItem.text.y = rendererItem.y - halfSize - shapeMargin - textHeight * (0.5 + Constants.TextMargin) as Coordinate;
+				}
+			}
 			return;
 		}
 	}
@@ -164,6 +210,11 @@ export class SeriesMarkersPaneView implements IUpdatablePaneView {
 				internalId: marker.internalId,
 				externalId: marker.id,
 				text: undefined,
+				textColor: undefined,
+				textPosition: undefined,
+				borderVisible: false,
+				borderColor: undefined,
+				borderWidth: undefined,
 			}));
 			this._dataInvalidated = false;
 		}
@@ -201,18 +252,23 @@ export class SeriesMarkersPaneView implements IUpdatablePaneView {
 
 			const rendererItem = this._data.items[index];
 			rendererItem.x = timeScale.indexToCoordinate(marker.time);
+			rendererItem.borderColor = marker.borderColor;
+			rendererItem.borderVisible = marker.borderVisible;
+			rendererItem.borderWidth = marker.borderWidth;
 			if (marker.text !== undefined && marker.text.length > 0) {
 				rendererItem.text = {
 					content: marker.text,
 					y: 0 as Coordinate,
 					width: 0,
 					height: 0,
+					color: marker.textColor ?? marker.color,
 				};
 			}
 			const dataAt = this._series.dataAt(marker.time);
 			if (dataAt === null) {
 				continue;
 			}
+			//
 			fillSizeAndY(rendererItem, marker, dataAt, offsets, layoutOptions.fontSize, shapeMargin, priceScale, timeScale, firstValue.value);
 		}
 		this._invalidated = false;
