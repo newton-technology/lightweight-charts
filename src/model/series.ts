@@ -587,7 +587,12 @@ export class Series<T extends SeriesType = SeriesType> extends PriceDataSource i
 				id: marker.id,
 				internalId: index,
 				text: marker.text,
+				textColor: marker.textColor,
+				textPosition: marker.textPosition,
 				size: marker.size,
+				borderVisible: marker.borderVisible,
+				borderColor: marker.borderColor,
+				borderWidth: marker.borderWidth,
 			};
 		});
 	}

@@ -10,6 +10,7 @@ import { SeriesItemsIndexesRange, TimedValue } from '../model/time-data';
 import { ScaledRenderer } from './scaled-renderer';
 import { drawArrow, hitTestArrow } from './series-markers-arrow';
 import { drawCircle, hitTestCircle } from './series-markers-circle';
+import { drawRoundedSquare, hitTestRoundedSquare } from './series-markers-rounded-square';
 import { drawSquare, hitTestSquare } from './series-markers-square';
 import { drawText, hitTestText } from './series-markers-text';
 
@@ -18,6 +19,7 @@ export interface SeriesMarkerText {
 	y: Coordinate;
 	width: number;
 	height: number;
+	color: string;
 }
 
 export interface SeriesMarkerRendererDataItem extends TimedValue {
@@ -25,6 +27,9 @@ export interface SeriesMarkerRendererDataItem extends TimedValue {
 	size: number;
 	shape: SeriesMarkerShape;
 	color: string;
+	borderVisible?: boolean;
+	borderColor?: string;
+	borderWidth?: number;
 	internalId: number;
 	externalId?: string;
 	text?: SeriesMarkerText;
@@ -94,12 +99,12 @@ export class SeriesMarkersRenderer extends ScaledRenderer {
 
 function drawItem(item: SeriesMarkerRendererDataItem, ctx: CanvasRenderingContext2D): void {
 	ctx.fillStyle = item.color;
+	drawShape(item, ctx);
 
 	if (item.text !== undefined) {
+		ctx.fillStyle = item.text.color;
 		drawText(ctx, item.text.content, item.x - item.text.width / 2, item.text.y);
 	}
-
-	drawShape(item, ctx);
 }
 
 function drawShape(item: SeriesMarkerRendererDataItem, ctx: CanvasRenderingContext2D): void {
@@ -115,10 +120,25 @@ function drawShape(item: SeriesMarkerRendererDataItem, ctx: CanvasRenderingConte
 			drawArrow(true, ctx, item.x, item.y, item.size);
 			return;
 		case 'circle':
-			drawCircle(ctx, item.x, item.y, item.size);
+			if (item.borderVisible) {
+				drawCircle(ctx, item.x, item.y, item.size, item.borderColor, item.borderWidth);
+			} else {
+				drawCircle(ctx, item.x, item.y, item.size);
+			}
 			return;
 		case 'square':
-			drawSquare(ctx, item.x, item.y, item.size);
+			if (item.borderVisible) {
+				drawSquare(ctx, item.x, item.y, item.size, item.borderColor, item.borderWidth);
+			} else {
+				drawSquare(ctx, item.x, item.y, item.size);
+			}
+			return;
+		case 'roundedSquare':
+			if (item.borderVisible) {
+				drawRoundedSquare(ctx, item.x, item.y, item.size, item.borderColor, item.borderWidth);
+			} else {
+				drawRoundedSquare(ctx, item.x, item.y, item.size);
+			}
 			return;
 	}
 
@@ -147,5 +167,7 @@ function hitTestShape(item: SeriesMarkerRendererDataItem, x: Coordinate, y: Coor
 			return hitTestCircle(item.x, item.y, item.size, x, y);
 		case 'square':
 			return hitTestSquare(item.x, item.y, item.size, x, y);
+		case 'roundedSquare':
+			return hitTestRoundedSquare(item.x, item.y, item.size, x, y);
 	}
 }
