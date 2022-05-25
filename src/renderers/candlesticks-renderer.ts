@@ -182,6 +182,8 @@ export class PaneRendererCandlesticks implements IPaneRenderer {
 		const borderWidth = this._calculateBorderWidth(pixelRatio);
 		const offset = borderWidth / 2;
 
+		ctx.lineWidth = borderWidth;
+
 		let prevEdge: number | null = null;
 
 		for (let i = visibleRange.from; i < visibleRange.to; i++) {
@@ -204,7 +206,6 @@ export class PaneRendererCandlesticks implements IPaneRenderer {
 				left = Math.min(left, right);
 			}
 
-			ctx.lineWidth = borderWidth;
 			this._drawRoundedRect(ctx, left + offset, right - offset, top + offset, bottom - offset, radius - offset);
 			ctx.stroke();
 
@@ -284,20 +285,14 @@ export class PaneRendererCandlesticks implements IPaneRenderer {
 				radius -= borderWidth;
 			}
 
-			this._drawRoundedRect(ctx, left, right, top, bottom, radius);
-			ctx.fill();
+			if (top < bottom) {
+				this._drawRoundedRect(ctx, left, right, top, bottom, radius);
+				ctx.fill();
+			}
 		}
 	}
 
 	private _drawRoundedRect(ctx: CanvasRenderingContext2D, left: number, right: number, top: number, bottom: number, radius: number): void {
-		if (this._data === null) {
-			return;
-		}
-
-		if (top > bottom) {
-			return;
-		}
-
 		ctx.beginPath();
 		ctx.moveTo(left + radius, top);
 		ctx.lineTo(right - radius, top);
