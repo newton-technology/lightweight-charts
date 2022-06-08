@@ -5,6 +5,7 @@ export const priceScaleOptionsDefaults: PriceScaleOptions = {
 	mode: PriceScaleMode.Normal,
 	invertScale: false,
 	alignLabels: true,
+	stickLabels: false,
 	borderVisible: true,
 	borderColor: '#2B2B43',
 	entireTextOnly: false,

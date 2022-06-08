@@ -123,6 +123,13 @@ export interface PriceScaleOptions {
 	alignLabels: boolean;
 
 	/**
+	 * Sticks price labels to price scale borders if they are off boundries
+	 *
+	 * @defaultValue `false`
+	 */
+	stickLabels: boolean;
+
+	/**
 	 * Price scale's position on the chart.
 	 *
 	 * @deprecated Use options for different price scales instead
