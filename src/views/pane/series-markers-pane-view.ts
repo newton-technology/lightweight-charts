@@ -60,7 +60,7 @@ function fillSizeAndY(
 			if (rendererItem.text !== undefined) {
 				switch (textPosition) {
 					case 'insideMarker':
-						rendererItem.text.y = rendererItem.y + textHeight * Constants.TextMargin as Coordinate;
+						rendererItem.text.y = rendererItem.y;
 						break;
 					default:
 						rendererItem.text.y = rendererItem.y + halfSize + shapeMargin + textHeight * (0.5 + Constants.TextMargin) as Coordinate;
@@ -73,7 +73,7 @@ function fillSizeAndY(
 			if (rendererItem.text !== undefined) {
 				switch (textPosition) {
 					case 'insideMarker':
-						rendererItem.text.y = rendererItem.y + textHeight * Constants.TextMargin as Coordinate;
+						rendererItem.text.y = rendererItem.y;
 						break;
 					default:
 						rendererItem.text.y = rendererItem.y - halfSize - textHeight * (0.5 + Constants.TextMargin) as Coordinate;
@@ -88,7 +88,7 @@ function fillSizeAndY(
 			if (rendererItem.text !== undefined) {
 				switch (textPosition) {
 					case 'insideMarker':
-						rendererItem.text.y = rendererItem.y + textHeight * Constants.TextMargin as Coordinate;
+						rendererItem.text.y = rendererItem.y;
 						break;
 					default:
 						rendererItem.text.y = rendererItem.y + halfSize + shapeMargin + textHeight * (0.5 + Constants.TextMargin) as Coordinate;
@@ -103,7 +103,7 @@ function fillSizeAndY(
 			if (rendererItem.text !== undefined) {
 				switch (textPosition) {
 					case 'insideMarker':
-						rendererItem.text.y = rendererItem.y + textHeight * Constants.TextMargin as Coordinate;
+						rendererItem.text.y = rendererItem.y;
 						break;
 					default:
 						rendererItem.text.y = rendererItem.y + halfSize + shapeMargin + textHeight * (0.5 + Constants.TextMargin) as Coordinate;
@@ -116,7 +116,7 @@ function fillSizeAndY(
 			if (rendererItem.text !== undefined) {
 				switch (textPosition) {
 					case 'insideMarker':
-						rendererItem.text.y = rendererItem.y + textHeight * Constants.TextMargin as Coordinate;
+						rendererItem.text.y = rendererItem.y;
 						break;
 					default:
 						rendererItem.text.y = rendererItem.y - halfSize - shapeMargin - textHeight * (0.5 + Constants.TextMargin) as Coordinate;
