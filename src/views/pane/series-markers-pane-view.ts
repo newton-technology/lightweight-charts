@@ -20,17 +20,21 @@ import {
 import {
 	calculateShapeHeight,
 	shapeMargin as calculateShapeMargin,
+	shapeSize as calculateShapeSize,
 } from '../../renderers/series-markers-utils';
 
 import { IUpdatablePaneView, UpdateType } from './iupdatable-pane-view';
 
 const enum Constants {
 	TextMargin = 0.1,
+	AxisMargin = 2,
 }
 
 interface Offsets {
 	aboveBar: number;
 	belowBar: number;
+	top: number;
+	bottom: number;
 }
 
 // eslint-disable-next-line max-params
@@ -50,6 +54,7 @@ function fillSizeAndY(
 	const lowPrice = isNumber(seriesData) ? seriesData : seriesData.low;
 	const sizeMultiplier = isNumber(marker.size) ? Math.max(marker.size, 0) : 1;
 	const shapeSize = calculateShapeHeight(timeScale.barSpacing()) * sizeMultiplier;
+	const markerSize = calculateShapeSize(marker.shape, shapeSize);
 	const halfSize = shapeSize / 2;
 	const textPosition = marker.textPosition ?? 'auto';
 	rendererItem.size = shapeSize;
@@ -99,7 +104,7 @@ function fillSizeAndY(
 			return;
 		}
 		case 'top': {
-			rendererItem.y = halfSize as Coordinate;
+			rendererItem.y = markerSize / 2 + offsets.top as Coordinate;
 			if (rendererItem.text !== undefined) {
 				switch (textPosition) {
 					case 'insideMarker':
@@ -112,7 +117,7 @@ function fillSizeAndY(
 			return;
 		}
 		case 'bottom': {
-			rendererItem.y = priceScale.height() - halfSize as Coordinate;
+			rendererItem.y = priceScale.height() - markerSize / 2 - offsets.bottom as Coordinate;
 			if (rendererItem.text !== undefined) {
 				switch (textPosition) {
 					case 'insideMarker':
@@ -239,6 +244,8 @@ export class SeriesMarkersPaneView implements IUpdatablePaneView {
 		const offsets: Offsets = {
 			aboveBar: shapeMargin,
 			belowBar: shapeMargin,
+			top: Constants.AxisMargin,
+			bottom: Constants.AxisMargin,
 		};
 		this._data.visibleRange = visibleTimedValues(this._data.items, visibleBars, true);
 		for (let index = this._data.visibleRange.from; index < this._data.visibleRange.to; index++) {
