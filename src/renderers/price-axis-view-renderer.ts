@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 import { drawScaled } from '../helpers/canvas-helpers';
 
 import { TextWidthCache } from '../model/text-width-cache';
@@ -48,6 +49,7 @@ export class PriceAxisViewRenderer implements IPriceAxisViewRenderer {
 		const totalHeight = rendererOptions.fontSize + paddingTop + paddingBottom;
 		const halfHeigth = Math.ceil(totalHeight * 0.5);
 		const totalWidth = horzBorder + textWidth + paddingInner + paddingOuter + tickSize;
+		const cornerRadius = Math.min(halfHeigth, this._data.cornerRadius ?? 0);
 
 		let yMid = this._commonData.coordinate;
 		if (this._commonData.fixedCoordinate) {
@@ -104,18 +106,28 @@ export class PriceAxisViewRenderer implements IPriceAxisViewRenderer {
 			const yBottomScaled = yMidScaled + tickHeight + (yMidScaled - yTopScaled);
 			const xTickScaled = Math.round(xTick * pixelRatio);
 
+			const cornerRadiusScaled = Math.round(cornerRadius * pixelRatio);
+
 			ctx.save();
 
-			ctx.beginPath();
-			ctx.moveTo(xInsideScaled, yTopScaled);
-			ctx.lineTo(xOutsideScaled, yTopScaled);
-			ctx.lineTo(xOutsideScaled, yBottomScaled);
-			ctx.lineTo(xInsideScaled, yBottomScaled);
-			ctx.fill();
-
-			// draw border
-			ctx.fillStyle = this._data.borderColor;
-			ctx.fillRect(alignRight ? rightScaled - horzBorderScaled : 0, yTopScaled, horzBorderScaled, yBottomScaled - yTopScaled);
+			if (cornerRadius) {
+				if (alignRight) {
+					this._drawRoundedRect(ctx, xOutsideScaled, xInsideScaled, yTopScaled, yBottomScaled, cornerRadiusScaled);
+				} else {
+					this._drawRoundedRect(ctx, xInsideScaled, xOutsideScaled, yTopScaled, yBottomScaled, cornerRadiusScaled);
+				}
+				ctx.fill();
+			} else {
+				ctx.beginPath();
+				ctx.moveTo(xInsideScaled, yTopScaled);
+				ctx.lineTo(xOutsideScaled, yTopScaled);
+				ctx.lineTo(xOutsideScaled, yBottomScaled);
+				ctx.lineTo(xInsideScaled, yBottomScaled);
+				ctx.fill();
+				// draw border
+				ctx.fillStyle = this._data.borderColor;
+				ctx.fillRect(alignRight ? rightScaled - horzBorderScaled : 0, yTopScaled, horzBorderScaled, yBottomScaled - yTopScaled);
+			}
 
 			if (this._data.tickVisible) {
 				ctx.fillStyle = this._commonData.color;
@@ -139,5 +151,19 @@ export class PriceAxisViewRenderer implements IPriceAxisViewRenderer {
 		}
 
 		return rendererOptions.fontSize + rendererOptions.paddingTop + rendererOptions.paddingBottom;
+	}
+
+	private _drawRoundedRect(ctx: CanvasRenderingContext2D, left: number, right: number, top: number, bottom: number, radius: number): void {
+		ctx.beginPath();
+		ctx.moveTo(left + radius, top);
+		ctx.lineTo(right - radius, top);
+		ctx.quadraticCurveTo(right, top, right, top + radius);
+		ctx.lineTo(right, bottom - radius);
+		ctx.quadraticCurveTo(right, bottom, right - radius, bottom);
+		ctx.lineTo(left + radius, bottom);
+		ctx.quadraticCurveTo(left, bottom, left, bottom - radius);
+		ctx.lineTo(left, top + radius);
+		ctx.quadraticCurveTo(left, top, left + radius, top);
+		ctx.closePath();
 	}
 }

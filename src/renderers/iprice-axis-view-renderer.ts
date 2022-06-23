@@ -16,6 +16,7 @@ export interface PriceAxisViewRendererData {
 	moveTextToInvisibleTick: boolean;
 	borderColor: string;
 	lineWidth?: LineWidth;
+	cornerRadius?: number;
 }
 
 export interface PriceAxisViewRendererOptions {

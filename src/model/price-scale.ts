@@ -130,6 +130,13 @@ export interface PriceScaleOptions {
 	stickLabels: boolean;
 
 	/**
+	 * Corner radius of price labels
+	 *
+	 * @defaultValue `0`
+	 */
+	labelCornerRadius: number;
+
+	/**
 	 * Price scale's position on the chart.
 	 *
 	 * @deprecated Use options for different price scales instead
