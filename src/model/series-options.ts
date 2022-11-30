@@ -79,6 +79,20 @@ export interface CandlestickStyleOptions {
 	 * @defaultValue `'#ef5350'`
 	 */
 	wickDownColor: string;
+
+	/**
+	 * Corner radius of candle body
+	 *
+	 * @defaultValue `0`
+	 */
+	cornerRadius: number;
+
+	/**
+	 * Wick relative width
+	 *
+	 * @defaultValue `0.1`
+	 */
+	wickWidth: number;
 }
 
 export function fillUpDownCandlesticksColors(options: Partial<CandlestickStyleOptions>): void {
@@ -423,6 +437,13 @@ export interface HistogramStyleOptions {
 	 * @defaultValue `0`
 	 */
 	base: number;
+
+	/**
+	 * Corner radius
+	 *
+	 * @defaultValue `0`
+	 */
+	cornerRadius: number;
 }
 
 /**

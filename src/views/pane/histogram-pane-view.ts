@@ -14,10 +14,11 @@ import { IPaneRenderer } from '../../renderers/ipane-renderer';
 
 import { SeriesPaneViewBase } from './series-pane-view-base';
 
-function createEmptyHistogramData(barSpacing: number): PaneRendererHistogramData {
+function createEmptyHistogramData(barSpacing: number, cornerRadius: number = 0): PaneRendererHistogramData {
 	return {
 		items: [],
 		barSpacing,
+		cornerRadius,
 		histogramBase: NaN,
 		visibleRange: null,
 	};
@@ -54,8 +55,9 @@ export class SeriesHistogramPaneView extends SeriesPaneViewBase<'Histogram', Tim
 
 	protected _fillRawPoints(): void {
 		const barSpacing = this._model.timeScale().barSpacing();
+		const cornerRadius = this._series.options().cornerRadius;
 
-		this._histogramData = createEmptyHistogramData(barSpacing);
+		this._histogramData = createEmptyHistogramData(barSpacing, cornerRadius);
 
 		let targetIndex = 0;
 		let itemIndex = 0;

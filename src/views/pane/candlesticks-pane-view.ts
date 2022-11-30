@@ -23,7 +23,9 @@ export class SeriesCandlesticksPaneView extends BarsPaneViewBase<'Candlestick', 
 		this._makeValid();
 		const data: PaneRendererCandlesticksData = {
 			bars: this._items,
+			cornerRadius: candlestickStyleProps.cornerRadius,
 			barSpacing: this._model.timeScale().barSpacing(),
+			wickWidth: candlestickStyleProps.wickWidth,
 			wickVisible: candlestickStyleProps.wickVisible,
 			borderVisible: candlestickStyleProps.borderVisible,
 			visibleRange: this._itemsVisibleRange,

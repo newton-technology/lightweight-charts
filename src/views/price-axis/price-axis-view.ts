@@ -90,6 +90,8 @@ export abstract class PriceAxisView implements IPriceAxisView {
 		this._axisRendererData.tickVisible = this._axisRendererData.tickVisible && priceScale.options().drawTicks;
 		this._paneRendererData.tickVisible = this._paneRendererData.tickVisible && priceScale.options().drawTicks;
 
+		this._axisRendererData.cornerRadius = this._axisRendererData.cornerRadius ?? priceScale.options().labelCornerRadius;
+
 		this._axisRenderer.setData(this._axisRendererData, this._commonRendererData);
 		this._paneRenderer.setData(this._paneRendererData, this._commonRendererData);
 

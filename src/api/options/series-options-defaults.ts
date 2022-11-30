@@ -22,6 +22,8 @@ export const candlestickStyleDefaults: CandlestickStyleOptions = {
 	wickColor: '#737375',
 	wickUpColor: '#26a69a',
 	wickDownColor: '#ef5350',
+	cornerRadius: 0,
+	wickWidth: 0.1,
 };
 
 export const barStyleDefaults: BarStyleOptions = {
@@ -85,6 +87,7 @@ export const baselineStyleDefaults: BaselineStyleOptions = {
 export const histogramStyleDefaults: HistogramStyleOptions = {
 	color: '#26a69a',
 	base: 0,
+	cornerRadius: 0,
 };
 
 export const seriesOptionsDefaults: SeriesOptionsCommon = {
